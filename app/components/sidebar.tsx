@@ -1,14 +1,17 @@
 "use client"
 
-import { Inbox, MessageSquare, Mail, Calendar, Bug, Settings, Search, Bell } from "lucide-react"
+import { Inbox, MessageSquare, Mail, Calendar, Bug, Settings, Search, LogOut, Bell } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { User } from "../../lib/data"
 
 interface SidebarProps {
   activeView: string
   setActiveView: (view: string) => void
+  user: User
+  onLogout: () => void
 }
 
 const menuItems = [
@@ -20,7 +23,7 @@ const menuItems = [
   { id: "jira", label: "Jira", icon: Bug, count: 2 },
 ]
 
-export function Sidebar({ activeView, setActiveView }: SidebarProps) {
+export function Sidebar({ activeView, setActiveView, user, onLogout }: SidebarProps) {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
       {/* Header */}
@@ -69,6 +72,16 @@ export function Sidebar({ activeView, setActiveView }: SidebarProps) {
         <Button variant="ghost" className="w-full justify-start gap-3">
           <Settings className="h-4 w-4" />
           Settings
+        </Button>
+
+        {/* Quick Logout Button */}
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+          onClick={onLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Log out
         </Button>
       </div>
     </div>

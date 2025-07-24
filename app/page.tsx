@@ -60,7 +60,7 @@ export default function Home() {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full bg-gray-50">
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar activeView={activeView} setActiveView={setActiveView} user={user} onLogout={handleLogout} />
         <div className="flex-1 overflow-hidden">
           <Dashboard activeView={activeView} />
         </div>
