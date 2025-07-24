@@ -7,12 +7,16 @@ import LoginPage from "./components/auth/login-page"
 import SignupPage from "./components/auth/signup-page"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { User } from "../lib/data"
+import { useAuthStore } from "../store/auth-store"
 
 export default function Home() {
   const [activeView, setActiveView] = useState("inbox")
-  const [user, setUser] = useState<User | null>(null)
   const [authView, setAuthView] = useState<"login" | "signup">("login")
   const [isLoading, setIsLoading] = useState(true)
+
+  const user = useAuthStore((state) => state.user)
+  const setUser = useAuthStore((state) => state.setUser)
+  const logout = useAuthStore((state) => state.logout)
 
   // Check for existing session on mount
   useEffect(() => {
@@ -21,16 +25,14 @@ export default function Home() {
       setUser(JSON.parse(savedUser))
     }
     setIsLoading(false)
-  }, [])
+  }, [setUser])
 
   const handleLogin = (userData: User) => {
     setUser(userData)
-    localStorage.setItem("user", JSON.stringify(userData))
   }
 
   const handleLogout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
+    logout()
     setActiveView("inbox")
   }
 
