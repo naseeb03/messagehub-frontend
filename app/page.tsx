@@ -6,7 +6,6 @@ import { Dashboard } from "./components/dashboard"
 import LoginPage from "./components/auth/login-page"
 import SignupPage from "./components/auth/signup-page"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { User } from "../lib/data"
 import { useAuthStore } from "../store/auth-store"
 
 export default function Home() {
@@ -15,21 +14,24 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   const user = useAuthStore((state) => state.user)
-  const setUser = useAuthStore((state) => state.setUser)
+  const token = useAuthStore((state) => state.token)
   const logout = useAuthStore((state) => state.logout)
 
   // Check for existing session on mount
   useEffect(() => {
     const savedUser = localStorage.getItem("user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    const savedToken = localStorage.getItem("token")
+    
+    if (savedUser && savedToken) {
+      // Restore user state from localStorage
+      useAuthStore.setState({
+        user: JSON.parse(savedUser),
+        token: savedToken,
+      })
     }
+    
     setIsLoading(false)
-  }, [setUser])
-
-  const handleLogin = (userData: User) => {
-    setUser(userData)
-  }
+  }, [])
 
   const handleLogout = () => {
     logout()
@@ -47,13 +49,13 @@ export default function Home() {
     )
   }
 
-  if (!user) {
+  if (!user || !token) {
     return (
       <div className="min-h-screen bg-gray-50">
         {authView === "login" ? (
-          <LoginPage onLogin={handleLogin} onSwitchToSignup={() => setAuthView("signup")} />
+          <LoginPage onSwitchToSignup={() => setAuthView("signup")} />
         ) : (
-          <SignupPage onSignup={handleLogin} onSwitchToLogin={() => setAuthView("login")} />
+          <SignupPage onSwitchToLogin={() => setAuthView("login")} />
         )}
       </div>
     )
