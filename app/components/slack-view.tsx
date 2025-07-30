@@ -1,54 +1,134 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { MessageCard } from "./message-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MessageSquare, Hash, Users } from "lucide-react"
+import { MessageSquare, Hash, Users, RefreshCw } from "lucide-react"
+import { useAuthStore } from "@/store/auth-store"
+import { api } from "@/lib/api"
 
-const slackMessages = [
-  {
-    id: "s1",
-    service: "slack",
-    sender: "John Doe",
-    subject: "Project Update",
-    preview:
-      "Hey team, just wanted to give you an update on the current project status. We're making good progress on the frontend components...",
-    timestamp: "2 minutes ago",
-    isRead: false,
-    channel: "#general",
-  },
-  {
-    id: "s2",
-    service: "slack",
-    sender: "Alice Smith",
-    subject: "Code Review Request",
-    preview:
-      "Could you please review my latest PR? It includes the new authentication flow and some UI improvements...",
-    timestamp: "3 hours ago",
-    isRead: false,
-    channel: "#dev-team",
-  },
-  {
-    id: "s3",
-    service: "slack",
-    sender: "Bob Wilson",
-    subject: "Design Feedback",
-    preview:
-      "I've uploaded the latest mockups to Figma. Would love to get everyone's thoughts on the new dashboard design...",
-    timestamp: "5 hours ago",
-    isRead: true,
-    channel: "#design",
-  },
-]
+interface SlackChannel {
+  id: string
+  name: string
+  is_channel: boolean
+  is_private: boolean
+  is_im: boolean
+  num_members?: number
+  username?: string
+  real_name?: string
+}
 
-const channels = [
-  { name: "#general", members: 24, unread: 3 },
-  { name: "#dev-team", members: 8, unread: 2 },
-  { name: "#design", members: 5, unread: 0 },
-  { name: "#random", members: 15, unread: 1 },
-]
+interface SlackMessage {
+  id: string
+  service: string
+  sender: string
+  subject: string
+  preview: string
+  timestamp: string
+  isRead: boolean
+  channel: string
+  username?: string
+  real_name?: string
+  text?: string
+  ts?: string
+}
 
 export function SlackView() {
+  const { token, user } = useAuthStore();
+  const [channels, setChannels] = useState<SlackChannel[]>([]);
+  const [messages, setMessages] = useState<SlackMessage[]>([]);
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (token && user?.slack_token) {
+      fetchChannels();
+    }
+  }, [token, user]);
+
+  const fetchChannels = async () => {
+    if (!token) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await api.getSlackChannels(token);
+      if (response.ok) {
+        setChannels(response.channels || []);
+        if (response.channels && response.channels.length > 0) {
+          setSelectedChannel(response.channels[0].id);
+          fetchMessages(response.channels[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch Slack conversations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMessages = async (channelId: string) => {
+    if (!token) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await api.getSlackMessages(token, channelId);
+      if (response.ok) {
+        const formattedMessages: SlackMessage[] = (response.messages || []).map((msg: any) => ({
+          id: msg.ts || Math.random().toString(),
+          service: "slack",
+          sender: msg.username || msg.real_name || "Unknown User",
+          subject: `Message in ${channels.find(c => c.id === channelId)?.name || 'channel'}`,
+          preview: msg.text || "No text content",
+          timestamp: formatTimestamp(msg.ts),
+          isRead: false,
+          channel: channels.find(c => c.id === channelId)?.name || 'Unknown',
+          username: msg.username,
+          real_name: msg.real_name,
+          text: msg.text,
+          ts: msg.ts
+        }));
+        setMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error("Failed to fetch Slack messages:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatTimestamp = (ts: string) => {
+    if (!ts) return "Unknown time";
+    const date = new Date(parseFloat(ts) * 1000);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} minutes ago`;
+    if (hours < 24) return `${hours} hours ago`;
+    return `${days} days ago`;
+  };
+
+  const handleChannelSelect = (channelId: string) => {
+    setSelectedChannel(channelId);
+    fetchMessages(channelId);
+  };
+
+  if (!user?.slack_token) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Slack Not Connected</h3>
+          <p className="text-gray-500">Please connect your Slack workspace to view messages.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex">
       {/* Channels Sidebar */}
@@ -65,19 +145,25 @@ export function SlackView() {
               Channels
             </h4>
             <div className="space-y-1">
-              {channels.map((channel) => (
-                <div
-                  key={channel.name}
-                  className="flex items-center justify-between p-2 rounded hover:bg-slate-800 cursor-pointer"
-                >
-                  <span className="text-sm">{channel.name}</span>
-                  {channel.unread > 0 && (
-                    <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {channel.unread}
-                    </Badge>
-                  )}
+              {isLoading ? (
+                <div className="flex items-center justify-center p-2">
+                  <RefreshCw className="h-4 w-4 animate-spin" />
                 </div>
-              ))}
+              ) : (
+                channels
+                  .filter(channel => channel.is_channel)
+                  .map((channel) => (
+                    <div
+                      key={channel.id}
+                      className={`flex items-center justify-between p-2 rounded hover:bg-slate-800 cursor-pointer ${
+                        selectedChannel === channel.id ? 'bg-slate-800' : ''
+                      }`}
+                      onClick={() => handleChannelSelect(channel.id)}
+                    >
+                      <span className="text-sm">#{channel.name}</span>
+                    </div>
+                  ))
+              )}
             </div>
           </div>
 
@@ -87,12 +173,19 @@ export function SlackView() {
               Direct Messages
             </h4>
             <div className="space-y-1">
-              <div className="p-2 rounded hover:bg-slate-800 cursor-pointer">
-                <span className="text-sm">John Doe</span>
-              </div>
-              <div className="p-2 rounded hover:bg-slate-800 cursor-pointer">
-                <span className="text-sm">Alice Smith</span>
-              </div>
+              {channels
+                .filter(channel => channel.is_im)
+                .map((channel) => (
+                  <div
+                    key={channel.id}
+                    className={`flex items-center justify-between p-2 rounded hover:bg-slate-800 cursor-pointer ${
+                      selectedChannel === channel.id ? 'bg-slate-800' : ''
+                    }`}
+                    onClick={() => handleChannelSelect(channel.id)}
+                  >
+                    <span className="text-sm">{channel.real_name || channel.username || 'Unknown User'}</span>
+                  </div>
+                ))}
             </div>
           </div>
         </div>
@@ -103,22 +196,36 @@ export function SlackView() {
         <div className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Slack Messages</h2>
-              <p className="text-sm text-gray-500">Recent messages from your Slack workspace</p>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedChannel ? channels.find(c => c.id === selectedChannel)?.name || 'Slack Messages' : 'Slack Messages'}
+              </h2>
+              <p className="text-sm text-gray-500">Your Slack messages</p>
             </div>
-            <Button>
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Open Slack
+            <Button onClick={fetchChannels} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-6">
-          <div className="space-y-4">
-            {slackMessages.map((message) => (
-              <MessageCard key={message.id} message={message} />
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.length > 0 ? (
+                messages.map((message) => (
+                  <MessageCard key={message.id} message={message} />
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  No messages found in this channel.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -41,5 +41,71 @@ export const api = {
     }
     
     return response.json();
+  },
+
+  async checkJiraConnection(token: string) {
+    // TODO: Implement when Jira OAuth is added
+    return false;
+  },
+
+  // Fetch messages and emails
+  async getSlackChannels(token: string) {
+    const response = await fetch(`${API_URL}/slack/conversations`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch Slack conversations');
+    }
+    
+    return response.json();
+  },
+
+  async getSlackMessages(token: string, channelId: string) {
+    const response = await fetch(`${API_URL}/slack/channels/${channelId}/messages`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch Slack messages');
+    }
+    
+    return response.json();
+  },
+
+  async getSlackConversations(token: string) {
+    const response = await fetch(`${API_URL}/slack/conversations`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch Slack conversations');
+    }
+    
+    return response.json();
+  },
+
+  async getGmailEmails(token: string) {
+    const response = await fetch(`${API_URL}/gmail/emails`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch Gmail emails');
+    }
+    
+    return response.json();
   }
 }; 
