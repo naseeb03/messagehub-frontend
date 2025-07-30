@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/store/auth-store"
 
 interface Connection {
   id: string
@@ -31,6 +32,7 @@ interface Connection {
 }
 
 export function ConnectionsView() {
+  const { user } = useAuthStore();
   const [connections, setConnections] = useState<Connection[]>([
     {
       id: "slack",
@@ -38,9 +40,7 @@ export function ConnectionsView() {
       description: "Connect your Slack workspace to receive messages and notifications",
       icon: MessageSquare,
       color: "bg-purple-500",
-      isConnected: true,
-      lastSync: "2 minutes ago",
-      accountInfo: "workspace: company-team.slack.com",
+      isConnected: false,
       permissions: ["Read messages", "Send messages", "Access channels"],
     },
     {
@@ -49,9 +49,7 @@ export function ConnectionsView() {
       description: "Connect your Gmail account to manage emails from the dashboard",
       icon: Mail,
       color: "bg-red-500",
-      isConnected: true,
-      lastSync: "5 minutes ago",
-      accountInfo: "john.doe@company.com",
+      isConnected: false,
       permissions: ["Read emails", "Send emails", "Manage labels"],
     },
     {
@@ -69,17 +67,92 @@ export function ConnectionsView() {
       description: "Connect to Jira to track issues, bugs, and project updates",
       icon: Bug,
       color: "bg-blue-600",
-      isConnected: true,
-      lastSync: "1 hour ago",
-      accountInfo: "company.atlassian.net",
+      isConnected: false,
       permissions: ["Read issues", "Create issues", "Update issues", "Access projects"],
     },
   ])
 
-  const handleConnect = (connectionId: string) => {
-    setConnections((prev) =>
-      prev.map((conn) => (conn.id === connectionId ? { ...conn, isConnected: true, lastSync: "Just now" } : conn)),
-    )
+  // Update connection status based on user tokens
+  useEffect(() => {
+    if (user) {
+      setConnections(prev => prev.map(conn => {
+        switch (conn.id) {
+          case "slack":
+            return { ...conn, isConnected: !!user.slack_token };
+          case "gmail":
+            return { ...conn, isConnected: !!user.gmail_token };
+          case "outlook":
+            return { ...conn, isConnected: !!user.outlook_token };
+          case "jira":
+            return { ...conn, isConnected: !!user.jira_token };
+          default:
+            return conn;
+        }
+      }));
+    }
+  }, [user]);
+
+  const handleConnect = async (connectionId: string) => {
+    try {
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+      
+      let installUrl: string;
+      
+      if (connectionId === "slack") {
+        // Get the Slack OAuth URL from backend with Bearer token
+        const response = await fetch("http://localhost:8000/slack/install", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (!response.ok) {
+          console.error("Failed to get Slack install URL");
+          return;
+        }
+        
+        const data = await response.json();
+        installUrl = data.url;
+      } else if (connectionId === "gmail") {
+        // Get the Gmail OAuth URL from backend with Bearer token
+        const response = await fetch("http://localhost:8000/gmail/install", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+        
+        if (!response.ok) {
+          console.error("Failed to get Gmail install URL");
+          return;
+        }
+        
+        const data = await response.json();
+        installUrl = data.url;
+      } else {
+        // For other services, just update UI for now
+        setConnections((prev) =>
+          prev.map((conn) => (conn.id === connectionId ? { ...conn, isConnected: true, lastSync: "Just now" } : conn)),
+        )
+        return;
+      }
+      
+      // Open the returned URL
+      window.open(installUrl, "_blank");
+      
+      // Update UI to show connecting
+      setConnections((prev) =>
+        prev.map((conn) => (conn.id === connectionId ? { ...conn, isConnected: true, lastSync: "Just now" } : conn)),
+      )
+    } catch (error) {
+      console.error(`Failed to connect to ${connectionId}:`, error);
+    }
   }
 
   const handleDisconnect = (connectionId: string) => {
