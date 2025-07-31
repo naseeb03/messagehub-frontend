@@ -48,6 +48,113 @@ export const api = {
     return false;
   },
 
+  // OAuth install URLs
+  async getSlackInstallUrl(token: string) {
+    const response = await fetch(`${API_URL}/slack/install`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get Slack install URL');
+    }
+    
+    return response.json();
+  },
+
+  async getGmailInstallUrl(token: string) {
+    const response = await fetch(`${API_URL}/gmail/gmail/install`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get Gmail install URL');
+    }
+    
+    return response.json();
+  },
+
+  async getOutlookInstallUrl(token: string) {
+    const response = await fetch(`${API_URL}/outlook/install`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get Outlook install URL');
+    }
+    
+    return response.json();
+  },
+
+  async getJiraInstallUrl(token: string) {
+    const response = await fetch(`${API_URL}/jira/install`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to get Jira install URL');
+    }
+    
+    return response.json();
+  },
+
+  // Connection status checks
+  async checkSlackConnection(token: string) {
+    const response = await fetch(`${API_URL}/slack/check-connection`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    return response.json();
+  },
+
+  async checkGmailConnection(token: string) {
+    const response = await fetch(`${API_URL}/gmail/check-connection`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    return response.json();
+  },
+
+  async checkOutlookConnection(token: string) {
+    const response = await fetch(`${API_URL}/outlook/check-connection`, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      return false;
+    }
+    
+    return response.json();
+  },
+
   // Fetch messages and emails
   async getSlackChannels(token: string) {
     const response = await fetch(`${API_URL}/slack/conversations`, {

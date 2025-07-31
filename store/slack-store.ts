@@ -47,7 +47,11 @@ export const useSlackStore = create<SlackStore>((set, get) => ({
   connect: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.getSlackInstallUrl();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await api.getSlackInstallUrl(token);
       // Open the Slack OAuth URL in a new window
       window.open(response.url, '_blank', 'width=600,height=600');
       set({ isLoading: false });
@@ -71,7 +75,11 @@ export const useSlackStore = create<SlackStore>((set, get) => ({
   fetchChannels: async () => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.getSlackConversations();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await api.getSlackConversations(token);
       if (response.ok) {
         const channels = response.channels || [];
         set({ 
@@ -96,7 +104,11 @@ export const useSlackStore = create<SlackStore>((set, get) => ({
   fetchMessages: async (channelId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.getSlackChannelMessages(channelId);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      const response = await api.getSlackMessages(token, channelId);
       if (response.ok) {
         const messages = response.messages || [];
         set({ 
