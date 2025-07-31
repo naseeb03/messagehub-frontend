@@ -25,7 +25,7 @@ const SignupPage = ({ onSwitchToLogin }: SignupPageProps) => {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState<boolean>(false)
 
   const { signup, isLoading, error, clearError } = useAuthStore()
 
@@ -201,7 +201,7 @@ const SignupPage = ({ onSwitchToLogin }: SignupPageProps) => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" checked={acceptTerms} onCheckedChange={setAcceptTerms} />
+                  <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(checked) => setAcceptTerms(checked === true)} />
                   <Label htmlFor="terms" className="text-sm">
                     I agree to the{" "}
                     <Button variant="link" className="px-0 h-auto text-sm">
