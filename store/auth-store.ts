@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         gmail_token: response.user.gmail_token,
         jira_token: response.user.jira_token,
         outlook_token: response.user.outlook_token,
+        gmail_refresh_token: response.user.gmail_refresh_token,
       };
 
       console.log(user);
@@ -63,6 +64,11 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         email: response.user.email,
         avatar: "/placeholder.svg?height=32&width=32",
         token: response.access_token,
+        slack_token: response.user.slack_token,
+        gmail_token: response.user.gmail_token,
+        jira_token: response.user.jira_token,
+        outlook_token: response.user.outlook_token,
+        gmail_refresh_token: response.user.gmail_refresh_token,
       };
 
       // For signup, we don't get a token, so we'll need to login to get the token

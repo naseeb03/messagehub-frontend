@@ -9,4 +9,5 @@ export interface User {
     gmail_token?: string | null
     jira_token?: string | null
     outlook_token?: string | null
+    gmail_refresh_token?: string | null
   }
