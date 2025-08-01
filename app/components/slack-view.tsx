@@ -52,7 +52,9 @@ export function SlackView() {
     
     try {
       setIsLoading(true);
+      console.log("fetchChannels");
       const response = await api.getSlackChannels(token);
+      console.log(response);
       if (response.ok) {
         setChannels(response.channels || []);
         if (response.channels && response.channels.length > 0) {
@@ -61,7 +63,7 @@ export function SlackView() {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch Slack conversations:", error);
+      console.error("Something went wrong:", error);
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,8 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Debug: Log the API URL (remove this in production)
+console.log('API_URL:', API_URL);
+
 export const api = {
   async login(email: string, password: string) {
     const response = await fetch(`${API_URL}/login`, {
@@ -157,12 +160,17 @@ export const api = {
 
   // Fetch messages and emails
   async getSlackChannels(token: string) {
+    console.log('I am here');
     const response = await fetch(`${API_URL}/slack/conversations`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
+
+    console.log(token);
+
+    console.log(response);
     
     if (!response.ok) {
       throw new Error('Failed to fetch Slack conversations');
@@ -194,8 +202,13 @@ export const api = {
       }
     });
     
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch Slack conversations');
+      const errorText = await response.text();
+      console.log('Error response:', errorText);
+      throw new Error(`Failed to fetch Slack conversations: ${response.status} ${errorText}`);
     }
     
     return response.json();

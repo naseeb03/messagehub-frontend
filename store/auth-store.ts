@@ -71,6 +71,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         gmail_refresh_token: response.user.gmail_refresh_token,
       };
 
+      console.log(user);
       // For signup, we don't get a token, so we'll need to login to get the token
       // But we can set the user data immediately
       set({ user, isLoading: false });
