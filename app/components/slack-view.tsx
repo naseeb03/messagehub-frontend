@@ -45,7 +45,7 @@ export function SlackView() {
     if (token && user?.slack_token) {
       fetchChannels();
     }
-  }, [token, user]);
+  }, [token, user?.slack_token]);
 
   const fetchChannels = async () => {
     if (!token) return;
