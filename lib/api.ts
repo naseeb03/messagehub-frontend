@@ -56,7 +56,8 @@ export const api = {
     const response = await fetch(`${API_URL}/slack/install`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -71,7 +72,8 @@ export const api = {
     const response = await fetch(`${API_URL}/gmail/gmail/install`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -86,7 +88,8 @@ export const api = {
     const response = await fetch(`${API_URL}/outlook/install`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -101,7 +104,8 @@ export const api = {
     const response = await fetch(`${API_URL}/jira/install`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -117,7 +121,8 @@ export const api = {
     const response = await fetch(`${API_URL}/slack/check-connection`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -132,7 +137,8 @@ export const api = {
     const response = await fetch(`${API_URL}/gmail/check-connection`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -147,7 +153,8 @@ export const api = {
     const response = await fetch(`${API_URL}/outlook/check-connection`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -164,7 +171,8 @@ export const api = {
     const response = await fetch(`${API_URL}/slack/conversations`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
 
@@ -183,7 +191,8 @@ export const api = {
     const response = await fetch(`${API_URL}/slack/channels/${channelId}/messages`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -198,7 +207,8 @@ export const api = {
     const response = await fetch(`${API_URL}/slack/conversations`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
@@ -218,7 +228,8 @@ export const api = {
     const response = await fetch(`${API_URL}/gmail/emails`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       }
     });
     
